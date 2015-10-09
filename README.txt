@@ -1,1 +1,3 @@
-You can easily install both using pip install lxml and pip install requests
+pip install lxml
+pip install requests
+pip install tablib

@@ -1,4 +1,5 @@
 from lxml import html
+import tablib
 import requests
 
 
@@ -68,14 +69,17 @@ def get_data():
 def parse_data(text):
     tree = html.fromstring(text)
     rows = tree.xpath('//tr')
+    data = tablib.Dataset()
 
     for row in rows :
         cols = row.xpath('//td')
+        columns = []
         if len(cols) > 3 :
             for col in cols :
-                print col.text
+                columns.append(col.text)
+            data.append(columns)
 
-
+    # print data.dict
 
 # resultsFromSearch = get_data()
 file = open('temp2.html', 'r')
