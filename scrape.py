@@ -66,20 +66,22 @@ def get_data():
     return t.text
 
 
+# parses the data from the html
 def parse_data(text):
     tree = html.fromstring(text)
     rows = tree.xpath('//tr')
     data = tablib.Dataset()
 
-    for row in rows :
-        cols = row.xpath('//td')
-        columns = []
-        if len(cols) > 3 :
-            for col in cols :
-                columns.append(col.text)
-            data.append(columns)
+    for row in rows:
+        cols = row.getchildren()
 
-    # print data.dict
+        if len(cols) == 5 :
+            print ""+cols[0].text+", "+ cols[1].text +", "+cols[2].text +", "+ cols[3].text+", "+ cols[4].text+" "
+                # columns.append(col.text)
+            # data.append(columns)
+
+            # print data.dict
+
 
 # resultsFromSearch = get_data()
 file = open('temp2.html', 'r')
