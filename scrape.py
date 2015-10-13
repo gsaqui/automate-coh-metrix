@@ -1,10 +1,13 @@
+import random
+import os.path
+
 from lxml import html
 from openpyxl import Workbook
 from openpyxl import load_workbook
-import os.path
 import requests
 
-#Posts the data to Coh Metrix website
+
+# Posts the data to Coh Metrix website
 def get_data():
     s = requests.Session()
     starter = s.get('http://141.225.42.101/cohmetrix3/login.aspx')
@@ -79,22 +82,28 @@ def parse_data(text):
 
     add_excel_header(rows, worksheet)
 
+    # Read all the rows and check to make sure we haven't put this value in before
+    for row in worksheet.rows:
+        print row[0].row
 
-
-    for row in rows:
-        cols = row.getchildren()
-
-        # if len(cols) == 5 :
-            # print ""+cols[0].text+", "+ cols[1].text +", "+cols[2].text +", "+ cols[3].text+", "+ cols[4].text+" "
-                # columns.append(col.text)
-            # data.append(columns)
-
-            # print data.dict
-
+    add_parsed_results_to_spreadsheet(rows, worksheet)
 
     workbook.save('results.xlsx')
 
-#Adds the excel column header
+
+# takes the rows that are parsed from the webiste and insert them into the excel spreadsheet
+def add_parsed_results_to_spreadsheet(rows, worksheet):
+    newRowNumber = len(worksheet.rows) + 1
+    columnNumber = 1
+    worksheet.cell(row=newRowNumber, column=columnNumber).value = random.randrange(0, 101, 2)
+    for row in rows:
+        cols = row.getchildren()
+        if len(cols) == 5:
+            columnNumber += 1
+            worksheet.cell(row=newRowNumber, column=columnNumber).value = cols[3].text
+
+
+# Adds the excel column header
 def add_excel_header(rows, worksheet):
     columnNumber = 1
     if worksheet['A1'].value != 'ID':
@@ -108,11 +117,12 @@ def add_excel_header(rows, worksheet):
 
 
 # Returns a workbook either by creating a new one or by reading the previous results
-def get_result_file(fileName) :
-    if os.path.isfile(fileName) :
+def get_result_file(fileName):
+    if os.path.isfile(fileName):
         return load_workbook(fileName)
 
     return Workbook()
+
 
 # resultsFromSearch = get_data()
 file = open('temp2.html', 'r')
