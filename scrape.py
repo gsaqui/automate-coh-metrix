@@ -1,5 +1,6 @@
 from lxml import html
 import tablib
+import os.path
 import requests
 
 
@@ -70,18 +71,44 @@ def get_data():
 def parse_data(text):
     tree = html.fromstring(text)
     rows = tree.xpath('//tr')
-    data = tablib.Dataset()
+    data = get_result_file('results.xls')
+
+
+    if data.headers is None or data.headers <= 0 :
+        headers = []
+        for row in rows :
+            cols = row.getchildren()
+            if len(cols) == 5 :
+                headers.append(cols[1].text)
+
+        print "We are adding columns"
+        data.headers = headers
+
+    print data.headers
+
 
     for row in rows:
         cols = row.getchildren()
 
-        if len(cols) == 5 :
-            print ""+cols[0].text+", "+ cols[1].text +", "+cols[2].text +", "+ cols[3].text+", "+ cols[4].text+" "
+        # if len(cols) == 5 :
+            # print ""+cols[0].text+", "+ cols[1].text +", "+cols[2].text +", "+ cols[3].text+", "+ cols[4].text+" "
                 # columns.append(col.text)
             # data.append(columns)
 
             # print data.dict
 
+
+    with open('results.xls', 'wb') as f:
+        f.write(data.xls)
+
+
+
+def get_result_file(fileName) :
+    if os.path.isfile(fileName) :
+        my_input_stream = open(fileName, "rb")
+        return tablib.import_set(my_input_stream)
+
+    return tablib.Dataset()
 
 # resultsFromSearch = get_data()
 file = open('temp2.html', 'r')
