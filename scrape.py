@@ -1,9 +1,10 @@
 from lxml import html
-import tablib
+from openpyxl import Workbook
+from openpyxl import load_workbook
 import os.path
 import requests
 
-
+#Posts the data to Coh Metrix website
 def get_data():
     s = requests.Session()
     starter = s.get('http://141.225.42.101/cohmetrix3/login.aspx')
@@ -67,24 +68,17 @@ def get_data():
     return t.text
 
 
-# parses the data from the html
+# parses the data from the html and sticks it into the excel spreadsheet
 def parse_data(text):
     tree = html.fromstring(text)
     rows = tree.xpath('//tr')
-    data = get_result_file('results.xls')
+    workbook = get_result_file('results.xlsx')
 
+    worksheet = workbook.active
+    worksheet.title = "Coh Results"
 
-    if data.headers is None or data.headers <= 0 :
-        headers = []
-        for row in rows :
-            cols = row.getchildren()
-            if len(cols) == 5 :
-                headers.append(cols[1].text)
+    add_excel_header(rows, worksheet)
 
-        print "We are adding columns"
-        data.headers = headers
-
-    print data.headers
 
 
     for row in rows:
@@ -98,17 +92,27 @@ def parse_data(text):
             # print data.dict
 
 
-    with open('results.xls', 'wb') as f:
-        f.write(data.xls)
+    workbook.save('results.xlsx')
+
+#Adds the excel column header
+def add_excel_header(rows, worksheet):
+    columnNumber = 1
+    if worksheet['A1'].value != 'ID':
+        worksheet.cell(row=1, column=columnNumber).value = 'ID'
+
+        for row in rows:
+            cols = row.getchildren()
+            if len(cols) == 5:
+                columnNumber += 1
+                worksheet.cell(row=1, column=columnNumber).value = cols[1].text
 
 
-
+# Returns a workbook either by creating a new one or by reading the previous results
 def get_result_file(fileName) :
     if os.path.isfile(fileName) :
-        my_input_stream = open(fileName, "rb")
-        return tablib.import_set(my_input_stream)
+        return load_workbook(fileName)
 
-    return tablib.Dataset()
+    return Workbook()
 
 # resultsFromSearch = get_data()
 file = open('temp2.html', 'r')
