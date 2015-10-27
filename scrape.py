@@ -1,3 +1,6 @@
+#!/usr/bin/python
+
+import sys
 import os.path
 from os import listdir
 from os.path import isfile, join
@@ -7,6 +10,16 @@ from openpyxl import Workbook
 from openpyxl import load_workbook
 import requests
 
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 # Posts the data to Coh Metrix website
 def get_data(writingSample, code):
@@ -126,11 +139,11 @@ def get_result_file(fileName):
 
 
 # Checkes all the files in the writing-samples directory to check to see if there are any new ones that need to be run
-def get_files_to_send_results_for():
+def get_files_to_send_results_for(sampleLocation):
     filesToBeUploaded = []
 
-    if os.path.isdir("writing-samples"):
-        onlyfiles = [f for f in listdir("writing-samples") if isfile(join("writing-samples", f))]
+    if os.path.isdir(sampleLocation):
+        onlyfiles = [f for f in listdir(sampleLocation) if isfile(join(sampleLocation, f))]
 
         workbook = get_result_file('results.xlsx')
         worksheet = workbook.active
@@ -145,23 +158,33 @@ def get_files_to_send_results_for():
                     shouldSampleBeAdded = False
 
             if shouldSampleBeAdded:
-                print "sample does get added " + sampleId
                 filesToBeUploaded.append(file)
 
     return filesToBeUploaded
 
 
-# resultsFromSearch = get_data()
-# file = open('temp2.html', 'r')
-# parse_data(file.read())
+if len(sys.argv) <= 1:
+    print
+    print bcolors.FAIL + "Usages: python scrape.py <directory where all writing samples are located>"+ bcolors.ENDC
+    print
+    sys.exit(-1)
 
-filesToBeUploaded = get_files_to_send_results_for()
-for file in filesToBeUploaded:
-    f = open('writing-samples/' + file, 'r')
+directoryOfWritingSamples = sys.argv[1]
+
+filesToBeUploaded = get_files_to_send_results_for(directoryOfWritingSamples)
+print "Number of files to be uploaded: " + str(len(filesToBeUploaded))
+count = 1
+for filename in filesToBeUploaded:
+    print str(count) + "-" + str(len(filesToBeUploaded)) + "   " + filename
+    f = open(directoryOfWritingSamples + '/' + filename, 'r')
     writingSample = f.read()
     f.close()
 
-    results = get_data(writingSample, file.split('.')[0])
+    results = get_data(writingSample, filename.split('.')[0])
 
-    parse_data(results, file.split('.')[0])
+    parse_data(results, filename.split('.')[0])
+    count = count + 1
+
 print "We are all done"
+
+
