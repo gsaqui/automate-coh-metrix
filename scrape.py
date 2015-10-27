@@ -1,4 +1,3 @@
-import random
 import os.path
 from os import listdir
 from os.path import isfile, join
@@ -10,7 +9,7 @@ import requests
 
 
 # Posts the data to Coh Metrix website
-def get_data():
+def get_data(writingSample, code):
     s = requests.Session()
     starter = s.get('http://141.225.42.101/cohmetrix3/login.aspx')
     tree = html.fromstring(starter.text)
@@ -63,9 +62,9 @@ def get_data():
         'tbTitle': 'test',
         'ddlGenre': 'Science',
         'tbSource': 'source',
-        'tbUserCode': 'job+code',
+        'tbUserCode': code,
         'ddlLSASpace': 'CollegeLevel',
-        'tbInput': 'this+is+some+really+nice+code',
+        'tbInput': writingSample,
         'btnSubmit': 'Submit',
     }
 
@@ -74,7 +73,7 @@ def get_data():
 
 
 # parses the data from the html and sticks it into the excel spreadsheet
-def parse_data(text):
+def parse_data(text, writingSampleId):
     tree = html.fromstring(text)
     rows = tree.xpath('//tr')
     workbook = get_result_file('results.xlsx')
@@ -88,16 +87,16 @@ def parse_data(text):
     # for row in worksheet.rows:
     # print row[0].row
 
-    add_parsed_results_to_spreadsheet(rows, worksheet)
+    add_parsed_results_to_spreadsheet(rows, worksheet, writingSampleId)
 
     workbook.save('results.xlsx')
 
 
 # takes the rows that are parsed from the webiste and insert them into the excel spreadsheet
-def add_parsed_results_to_spreadsheet(rows, worksheet):
+def add_parsed_results_to_spreadsheet(rows, worksheet, writingSampleId):
     newRowNumber = len(worksheet.rows) + 1
     columnNumber = 1
-    worksheet.cell(row=newRowNumber, column=columnNumber).value = random.randrange(0, 101, 2)
+    worksheet.cell(row=newRowNumber, column=columnNumber).value = writingSampleId
     for row in rows:
         cols = row.getchildren()
         if len(cols) == 5:
@@ -126,15 +125,15 @@ def get_result_file(fileName):
     return Workbook()
 
 
+# Checkes all the files in the writing-samples directory to check to see if there are any new ones that need to be run
 def get_files_to_send_results_for():
+    filesToBeUploaded = []
+
     if os.path.isdir("writing-samples"):
         onlyfiles = [f for f in listdir("writing-samples") if isfile(join("writing-samples", f))]
 
         workbook = get_result_file('results.xlsx')
         worksheet = workbook.active
-
-        for row in worksheet.rows:
-            print row[0].row
 
         for file in onlyfiles:
             sampleId = file.split('.')[0]
@@ -147,10 +146,22 @@ def get_files_to_send_results_for():
 
             if shouldSampleBeAdded:
                 print "sample does get added " + sampleId
+                filesToBeUploaded.append(file)
+
+    return filesToBeUploaded
 
 
 # resultsFromSearch = get_data()
-file = open('temp2.html', 'r')
-parse_data(file.read())
+# file = open('temp2.html', 'r')
+# parse_data(file.read())
 
-get_files_to_send_results_for()
+filesToBeUploaded = get_files_to_send_results_for()
+for file in filesToBeUploaded:
+    f = open('writing-samples/' + file, 'r')
+    writingSample = f.read()
+    f.close()
+
+    results = get_data(writingSample, file.split('.')[0])
+
+    parse_data(results, file.split('.')[0])
+print "We are all done"
