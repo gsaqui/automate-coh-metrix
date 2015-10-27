@@ -1,5 +1,7 @@
 import random
 import os.path
+from os import listdir
+from os.path import isfile, join
 
 from lxml import html
 from openpyxl import Workbook
@@ -83,8 +85,8 @@ def parse_data(text):
     add_excel_header(rows, worksheet)
 
     # Read all the rows and check to make sure we haven't put this value in before
-    for row in worksheet.rows:
-        print row[0].row
+    # for row in worksheet.rows:
+    # print row[0].row
 
     add_parsed_results_to_spreadsheet(rows, worksheet)
 
@@ -124,6 +126,31 @@ def get_result_file(fileName):
     return Workbook()
 
 
+def get_files_to_send_results_for():
+    if os.path.isdir("writing-samples"):
+        onlyfiles = [f for f in listdir("writing-samples") if isfile(join("writing-samples", f))]
+
+        workbook = get_result_file('results.xlsx')
+        worksheet = workbook.active
+
+        for row in worksheet.rows:
+            print row[0].row
+
+        for file in onlyfiles:
+            sampleId = file.split('.')[0]
+
+            shouldSampleBeAdded = True
+            for row in worksheet.rows:
+                cellValue = str(worksheet.cell(row=row[0].row, column=1).value)
+                if cellValue == sampleId:
+                    shouldSampleBeAdded = False
+
+            if shouldSampleBeAdded:
+                print "sample does get added " + sampleId
+
+
 # resultsFromSearch = get_data()
 file = open('temp2.html', 'r')
 parse_data(file.read())
+
+get_files_to_send_results_for()
