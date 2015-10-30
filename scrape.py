@@ -23,7 +23,7 @@ class bcolors:
 
 
 # Posts the data to Coh Metrix website
-def get_data(writingSample, code):
+def get_data(writingSample, code, genre):
     s = requests.Session()
     starter = s.get('http://141.225.42.101/cohmetrix3/login.aspx')
     tree = html.fromstring(starter.text)
@@ -74,7 +74,7 @@ def get_data(writingSample, code):
         '__VIEWSTATEGENERATOR': 'AD710423',
         '__EVENTVALIDATION': validation,
         'tbTitle': 'test',
-        'ddlGenre': 'Science',
+        'ddlGenre': genre,
         'tbSource': 'source',
         'tbUserCode': code,
         'ddlLSASpace': 'CollegeLevel',
@@ -164,14 +164,16 @@ def get_files_to_send_results_for(sampleLocation, outputFileName):
     return filesToBeUploaded
 
 
-if len(sys.argv) <= 2:
+if len(sys.argv) <= 3:
     print
-    print bcolors.FAIL + "Usages: python scrape.py <directory where all writing samples are located> <results file.xslx>" + bcolors.ENDC
+    print bcolors.FAIL + "Usages: python scrape.py <Genre (Science|Narrative|Informational)> <directory where all writing samples are located> <results file.xlsx>" + bcolors.ENDC
     print
     sys.exit(-1)
 
-directoryOfWritingSamples = sys.argv[1]
-outputFileName = sys.argv[2]
+genre = sys.argv[1]
+directoryOfWritingSamples = sys.argv[2]
+outputFileName = sys.argv[3]
+
 
 filesToBeUploaded = get_files_to_send_results_for(directoryOfWritingSamples, outputFileName)
 print "Number of files to be uploaded: " + str(len(filesToBeUploaded))
@@ -182,7 +184,7 @@ for filename in filesToBeUploaded:
     writingSample = f.read()
     f.close()
 
-    results = get_data(writingSample, filename.split('.')[0])
+    results = get_data(writingSample, filename.split('.')[0], genre)
 
     parse_data(results, filename.split('.')[0], outputFileName)
     count += 1
