@@ -87,10 +87,10 @@ def get_data(writingSample, code):
 
 
 # parses the data from the html and sticks it into the excel spreadsheet
-def parse_data(text, writingSampleId):
+def parse_data(text, writingSampleId, outputFileName):
     tree = html.fromstring(text)
     rows = tree.xpath('//tr')
-    workbook = get_result_file('results.xlsx')
+    workbook = get_result_file(outputFileName)
 
     worksheet = workbook.active
     worksheet.title = "Coh Results"
@@ -103,7 +103,7 @@ def parse_data(text, writingSampleId):
 
     add_parsed_results_to_spreadsheet(rows, worksheet, writingSampleId)
 
-    workbook.save('results.xlsx')
+    workbook.save(outputFileName)
 
 
 # takes the rows that are parsed from the webiste and insert them into the excel spreadsheet
@@ -140,13 +140,13 @@ def get_result_file(fileName):
 
 
 # Checkes all the files in the writing-samples directory to check to see if there are any new ones that need to be run
-def get_files_to_send_results_for(sampleLocation):
+def get_files_to_send_results_for(sampleLocation, outputFileName):
     filesToBeUploaded = []
 
     if os.path.isdir(sampleLocation):
         onlyfiles = [f for f in listdir(sampleLocation) if isfile(join(sampleLocation, f))]
 
-        workbook = get_result_file('results.xlsx')
+        workbook = get_result_file(outputFileName)
         worksheet = workbook.active
 
         for file in onlyfiles:
@@ -164,15 +164,16 @@ def get_files_to_send_results_for(sampleLocation):
     return filesToBeUploaded
 
 
-if len(sys.argv) <= 1:
+if len(sys.argv) <= 2:
     print
-    print bcolors.FAIL + "Usages: python scrape.py <directory where all writing samples are located>" + bcolors.ENDC
+    print bcolors.FAIL + "Usages: python scrape.py <directory where all writing samples are located> <results file.xslx>" + bcolors.ENDC
     print
     sys.exit(-1)
 
 directoryOfWritingSamples = sys.argv[1]
+outputFileName = sys.argv[2]
 
-filesToBeUploaded = get_files_to_send_results_for(directoryOfWritingSamples)
+filesToBeUploaded = get_files_to_send_results_for(directoryOfWritingSamples, outputFileName)
 print "Number of files to be uploaded: " + str(len(filesToBeUploaded))
 count = 1
 for filename in filesToBeUploaded:
@@ -183,7 +184,7 @@ for filename in filesToBeUploaded:
 
     results = get_data(writingSample, filename.split('.')[0])
 
-    parse_data(results, filename.split('.')[0])
-    count = count + 1
+    parse_data(results, filename.split('.')[0], outputFileName)
+    count += 1
 
 print "We are all done"
