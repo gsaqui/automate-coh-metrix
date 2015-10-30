@@ -21,6 +21,7 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+
 # Posts the data to Coh Metrix website
 def get_data(writingSample, code):
     s = requests.Session()
@@ -165,7 +166,7 @@ def get_files_to_send_results_for(sampleLocation):
 
 if len(sys.argv) <= 1:
     print
-    print bcolors.FAIL + "Usages: python scrape.py <directory where all writing samples are located>"+ bcolors.ENDC
+    print bcolors.FAIL + "Usages: python scrape.py <directory where all writing samples are located>" + bcolors.ENDC
     print
     sys.exit(-1)
 
@@ -186,5 +187,3 @@ for filename in filesToBeUploaded:
     count = count + 1
 
 print "We are all done"
-
-
