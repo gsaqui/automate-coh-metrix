@@ -5,12 +5,14 @@ import os.path
 from os import listdir
 from os.path import isfile, join
 
+import requests
+
 from lxml import html
 from openpyxl import Workbook
 from openpyxl import load_workbook
-import requests
 
 
+# Console text colours
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -69,7 +71,7 @@ def get_data(writingSample, code, genre):
     viewstate = "/wEPDwUJNzU4MDYzOTUyZGQKNmk5nIq1XYBgXUM1EZ1Hs0bJWQ=="
     validation = '/wEWCgLrrJCoDQK506zcAwLy07LaDALjz837AwLBx6n3AwLptdyVCAL0geaDCwLCoveuCALpouS8DQLCi9reA0rdDT2rbbn4VrlhjGW0OKnV7hBW'
 
-    tempData = {
+    sampleData = {
         '__VIEWSTATE': viewstate,
         '__VIEWSTATEGENERATOR': 'AD710423',
         '__EVENTVALIDATION': validation,
@@ -82,7 +84,7 @@ def get_data(writingSample, code, genre):
         'btnSubmit': 'Submit',
     }
 
-    t = s.post('http://141.225.42.101/cohmetrix3/input.aspx', headers=headers, cookies=cookies, data=tempData)
+    t = s.post('http://141.225.42.101/cohmetrix3/input.aspx', headers=headers, cookies=cookies, data=sampleData)
     return t.text
 
 
@@ -98,9 +100,6 @@ def parse_data(text, writingSampleId, outputFileName):
     add_excel_header(rows, worksheet)
 
     # Read all the rows and check to make sure we haven't put this value in before
-    # for row in worksheet.rows:
-    # print row[0].row
-
     add_parsed_results_to_spreadsheet(rows, worksheet, writingSampleId)
 
     workbook.save(outputFileName)
@@ -139,7 +138,7 @@ def get_result_file(fileName):
     return Workbook()
 
 
-# Checkes all the files in the writing-samples directory to check to see if there are any new ones that need to be run
+# Checks all the files in the writing-samples directory to check to see if there are any new ones that need to be run
 def get_files_to_send_results_for(sampleLocation, outputFileName):
     filesToBeUploaded = []
 
@@ -173,7 +172,6 @@ if len(sys.argv) <= 3:
 genre = sys.argv[1]
 directoryOfWritingSamples = sys.argv[2]
 outputFileName = sys.argv[3]
-
 
 filesToBeUploaded = get_files_to_send_results_for(directoryOfWritingSamples, outputFileName)
 print "Number of files to be uploaded: " + str(len(filesToBeUploaded))
