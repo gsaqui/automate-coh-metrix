@@ -4,7 +4,7 @@ python 2.7
 ####  Required installed libraries
 
 
-- pip install lxml
+- pip install lxml  (linux sudo apt-get python-lxml)
 - pip install requests
 - pip install openpyxl
 
