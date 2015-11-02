@@ -13,3 +13,7 @@ python 2.7
 
 ```Usages: python scrape.py <Genre (Science|Narrative|Informational)> <directory where all writing samples are located> <results file.xlsx>```
 
+
+##### Example:
+
+```python scrape.py Informational samples these-kids-can-really-right.xlsx``` (that output name is a joke)
