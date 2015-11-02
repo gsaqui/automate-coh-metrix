@@ -1,14 +1,14 @@
-**Requirements**
+####Requirements
 python 2.7
 
-#  Required installed libraries #
+####  Required installed libraries
 
 
-pip install lxml
-pip install requests
-pip install openpyxl
+- pip install lxml
+- pip install requests
+- pip install openpyxl
 
-# Usage
+#### Usage
 
 
 ```Usages: python scrape.py <Genre (Science|Narrative|Informational)> <directory where all writing samples are located> <results file.xlsx>```
