@@ -27,7 +27,7 @@ class bcolors:
 # Posts the data to Coh Metrix website
 def get_data(writingSample, code, genre):
     s = requests.Session()
-    starter = s.get('http://141.225.42.101/cohmetrix3/login.aspx')
+    starter = s.get('http://141.225.42.101/cohmetrix3/login.aspx', timeout=120)
     tree = html.fromstring(starter.text)
 
     cookies = {
@@ -56,7 +56,7 @@ def get_data(writingSample, code, genre):
         'TextBox2': "bebZjcis",
         'Button1': 'Login',
     }
-    l = s.post('http://141.225.42.101/cohmetrix3/login.aspx', headers=headers, data=data, cookies=cookies)
+    l = s.post('http://141.225.42.101/cohmetrix3/login.aspx', headers=headers, data=data, cookies=cookies, timeout=120)
 
     headers = {
         'Host': '141.225.42.101',
@@ -84,7 +84,7 @@ def get_data(writingSample, code, genre):
         'btnSubmit': 'Submit',
     }
 
-    t = s.post('http://141.225.42.101/cohmetrix3/input.aspx', headers=headers, cookies=cookies, data=sampleData)
+    t = s.post('http://141.225.42.101/cohmetrix3/input.aspx', headers=headers, cookies=cookies, data=sampleData, timeout=120)
     return t.text
 
 
@@ -179,9 +179,11 @@ count = 1
 for filename in filesToBeUploaded:
     print str(count) + "-" + str(len(filesToBeUploaded)) + "   " + filename
     f = open(directoryOfWritingSamples + '/' + filename, 'r')
-    writingSample = f.read()
+    writingSample = f.read().decode('windows-1252')
     f.close()
 
+
+    writingSample = writingSample.replace(u"\u2018", "'").replace(u"\u2019", "'").replace(u"\u201c","\"").replace(u"\u201d", "\"")
     results = get_data(writingSample, filename.split('.')[0], genre)
 
     parse_data(results, filename.split('.')[0], outputFileName)
